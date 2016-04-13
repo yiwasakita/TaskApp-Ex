@@ -12,13 +12,39 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
-
+    
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        // Override point for customization after application launch.
+        // Asking the user permission of notification.
+        let settings = UIUserNotificationSettings(forTypes: [UIUserNotificationType.Alert, UIUserNotificationType.Sound], categories: nil)
+        UIApplication.sharedApplication().registerUserNotificationSettings(settings)
+        
+        // Verifying if a notification triggered the app start.
+        if let notification = launchOptions?[UIApplicationLaunchOptionsLocalNotificationKey] as? UILocalNotification {
+            // Deleting the notification from the notification section.
+            application.cancelLocalNotification(notification)
+        }
+        
         return true
     }
-
+    
+    func application(application: UIApplication, didReceiveLocalNotification notification: UILocalNotification) {
+        // If a notification is triggered when the app is in the foreground.
+        if application.applicationState == UIApplicationState.Active {
+            // Displaying the alert.
+            let alertController = UIAlertController(title: "時間になりました", message: notification.alertBody, preferredStyle: .Alert)
+            let defaultAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: nil)
+            alertController.addAction(defaultAction)
+            
+            window?.rootViewController!.presentViewController(alertController, animated: true, completion: nil)
+        } else {
+            // If a notification is triggered when the app is in teh background, just print the log.
+            print("\(notification.alertBody)")
+        }
+        
+        // Deleting the notification from the notification section.
+        application.cancelLocalNotification(notification)
+    }
+    
     func applicationWillResignActive(application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
